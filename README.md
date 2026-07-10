@@ -1,53 +1,65 @@
-# Conan-the-Caveman-Linux
+# Conan-the-Caveman-Android
 
-A side-scrolling caveman platformer, rebuilt on [**Storm Engine v2**](https://github.com/WillSams/storm-engine-v2).
+A side-scrolling caveman platformer for Android, built on [**Storm Engine v2**](https://github.com/WillSams/storm-engine-v2).
 
-Originally the example project from ['SDL Game Development'][2] by Shaun Mitchell; the game has since been re-architected on the engine's `Game` + `GameStateMachine` + `AssetStore`, with the level converted from Tiled TMX to the engine's native map format and the platformer physics extracted into pure, unit-tested headers.
+Originally the example project from ['SDL Game Development'][2] by Shaun Mitchell, re-architected on the engine's `Game` + `GameStateMachine` + `AssetStore`. This repo is the Android port: the engine and game compile into a single JNI library via Gradle + CMake + NDK, SDL's `SDLActivity` hosts it, and on-screen touch controls (a d-pad and a four-button action cluster) drive the caveman. The desktop version lives in [Conan-the-Caveman-Linux](https://github.com/WillSams/Conan-the-Caveman-Linux).
 
 ![text](conan-screen.png)
 
 ## Requirements
 
-- **Storm Engine v2 v1.0.2+** (`libstormenginev2` + `stormengine2` headers) — pre-built `.deb` packages are on the engine's [Releases](https://github.com/WillSams/storm-engine-v2/releases) page. v1.0.2 is required: the game changes state from within states and pushes a pause overlay, which relies on the engine's deferred state deletion.
-- SDL2 and extensions: `sudo apt install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev`
-- tinyxml2: `sudo apt install libtinyxml2-dev`
-- [igloo](https://github.com/joakimkarlsson/igloo) (header-only) — only needed for `make test`
+- **Storm Engine v2 v1.1.1+**, vendored as the `external/storm-engine-v2` submodule (Android needs the engine compiled in, not an installed `.so`)
+- Java 17, Android cmdline-tools, NDK, and CMake — see the engine's [`examples/android-platformer/README.md`](https://github.com/WillSams/storm-engine-v2/blob/main/examples/android-platformer/README.md) for the exact `sdkmanager` install commands
+- A device with **USB debugging** enabled (or an emulator)
 
-## Build, run, test
+## Setup
 
 ```bash
-make            # builds bin/conan-game
-make run
-make test       # igloo specs for the pure platformer logic
+git clone --recursive https://github.com/WillSams/Conan-the-Caveman-Android.git
+cd Conan-the-Caveman-Android
+# if you cloned without --recursive:
+git submodule update --init --recursive
 ```
+
+The recursive init pulls the engine and, under it, the pinned SDL2 / SDL_image / SDL_ttf / SDL_mixer / tinyxml2 / glm Android sources.
+
+## Build, install, run
+
+```bash
+./gradlew assembleDebug     # app/build/outputs/apk/debug/app-debug.apk
+./gradlew installDebug      # install onto the connected device
+adb shell am start -n com.stormengine.conan/.ConanActivity
+```
+
+Or tap **Conan the Caveman** in the app drawer. The first build compiles SDL and FreeType from source, so it takes a while; later builds only recompile the game.
 
 ## Controls
 
-| Keyboard | Gamepad | Action |
-|---|---|---|
-| Arrows / WASD | D-pad / left stick | Move |
-| Space / Up / W | A | Jump |
-| Esc / P | Start | Pause (resume from the overlay) |
-| Up/Down + Enter | D-pad + A | Navigate menus |
+On-screen, laid out for thumbs:
 
-Gamepads (Xbox/PlayStation-style, USB or Bluetooth) are detected automatically, including hot-plugging mid-game. Stomp the snails; touching one any other way sends Conan to the game-over screen.
+- **Left — d-pad**: a circular pad; left/right walk (up/down are wired for future use). Angle sectors mean diagonals register naturally.
+- **Right — action diamond**: SNES-style **X / Y / A / B**. **A or B jumps.** X and Y are wired but unmapped in this game.
+- **Pause**: the top-right zone, the Android **Back** button, or **Start** on a paired controller.
+
+Bluetooth controllers and keyboards work too — the touch layer sits on top of the engine's existing gamepad/keyboard input.
+
+## Tests
+
+The pure input logic (touch-zone math, virtual-gamepad d-pad sectors and button diamond) and the game's platformer physics are unit-tested with [igloo](https://github.com/joakimkarlsson/igloo):
+
+```bash
+make test       # builds and runs the desktop spec suite
+```
 
 ## Layout
 
 ```text
-src/game.*            Engine shell: window, renderer, GameStateMachine
-src/states/           Menu, Play, Pause (pushed on the state stack), GameOver
-src/physics/          Pure platformer physics (gravity, jump, AABB, stomp)
-src/input/            Gamepad wrapper + pure deadzone/menu-nav logic
-src/level/            Collider-map parser
-src/ui/               3-frame button logic + XML-driven button screens
-src/sprites/          Player sheet frame table (irregular rows)
-specs/                igloo specs for the pure headers (make test)
-tools/tmx2map.py      Converts data/gfx/map1.tmx -> data/conan.map + colliders
-data/conan.xml        Menu/Pause/GameOver screens (engine XmlLoader format)
+external/storm-engine-v2   Engine submodule (pinned to v1.1.1) with its vendored Android SDL sources
+include/stormengine2       Symlink to the engine's common/ so <stormengine2/...> includes resolve
+app/                       Gradle module: build.gradle, jni/CMakeLists.txt, ConanActivity, AndroidManifest
+src/                       Game code — states, physics, input (virtualGamepad.h)
+data/                      Level (conan.map + colliders), screen XML, gfx, sfx — extracted to internal storage at launch
+specs/                     igloo specs for the pure logic
 ```
 
-The original Tiled level (`data/gfx/map1.tmx`) is still the source of truth for the map — edit it in [Tiled][3] and re-run `python3 tools/tmx2map.py` to regenerate the engine-format files.
-
 [2]: https://www.packtpub.com/game-development/sdl-game-development
-[3]: https://www.mapeditor.org/
