@@ -33,6 +33,17 @@ adb shell am start -n com.stormengine.conan/.ConanActivity
 
 Or tap **Conan the Caveman** in the app drawer. The first build compiles SDL and FreeType from source, so it takes a while; later builds only recompile the game.
 
+### Installing a prebuilt APK
+
+Every push to `main` publishes a debug APK to the [latest release](../../releases/tag/latest); the CI **Android Build** run also attaches it as an artifact. Because debug builds are signed with a throwaway keystore that differs between your machine and CI (and between CI runs), Android will refuse to install one *over* a copy signed by a different key — the install silently fails even though Play Protect passes it. Uninstall any existing copy first:
+
+```bash
+adb uninstall com.stormengine.conan   # or long-press the icon -> Uninstall
+adb install app-debug.apk
+```
+
+`adb install` (rather than tapping the file) prints the real reason on failure — `INSTALL_FAILED_UPDATE_INCOMPATIBLE` confirms the signature mismatch.
+
 ## Controls
 
 On-screen, laid out for thumbs:

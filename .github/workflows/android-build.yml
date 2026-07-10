@@ -9,6 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write   # publish the debug APK to Releases on main
 
     steps:
       - name: Checkout (with engine + vendored SDL submodules)
@@ -50,3 +52,19 @@ jobs:
           name: conan-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # Publish a rolling "latest" debug build to Releases (main only). It's
+      # debug-signed with a fresh keystore each run, so uninstall any prior copy
+      # before reinstalling on a device.
+      - name: Publish latest debug APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest debug build
+          body: |
+            Rolling debug APK built from `main` (commit ${{ github.sha }}).
+
+            Debug-signed — uninstall any previous copy before reinstalling.
+          prerelease: true
+          files: app/build/outputs/apk/debug/app-debug.apk
