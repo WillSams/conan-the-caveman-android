@@ -1,0 +1,25 @@
+name: PR Validate
+
+on:
+  pull_request:
+
+jobs:
+  test-amd64:
+    runs-on: ubuntu-latest
+    # Run inside the igloo base image (igloo preinstalled, matching toolchain)
+    # instead of building an image on every PR — faster and avoids Buildx /
+    # Docker Hub pull flakiness.
+    container: storminator16/igloo-testing:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            libsdl2-dev libglm-dev libsqlite3-dev
+
+      - name: Run tests
+        run: make -f Makefile test
