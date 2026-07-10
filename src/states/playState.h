@@ -12,7 +12,7 @@
 #include <stormengine2/tilemapLoader.h>
 
 #include "../input/gamepad.h"
-#include "../input/virtualGamepad.h"
+#include <stormengine2/input/virtualGamepad.h>
 #include "../level/colliderMap.h"
 #include "../physics/platformer.h"
 #include "../sprites/playerFrames.h"
