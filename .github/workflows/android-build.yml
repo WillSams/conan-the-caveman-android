@@ -32,7 +32,7 @@ jobs:
       # Caching app/.cxx skips the ~10-15 min SDL + FreeType NDK rebuild on
       # every run after the first green build.
       - name: Cache Gradle + native build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/caches
