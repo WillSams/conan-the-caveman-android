@@ -24,7 +24,7 @@ jobs:
           java-version: 17
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install pinned NDK + CMake
         run: sdkmanager "ndk;26.1.10909125" "cmake;3.22.1"
