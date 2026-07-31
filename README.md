@@ -8,7 +8,7 @@ Originally the example project from ['SDL Game Development'][2] by Shaun Mitchel
 
 ## Requirements
 
-- **Storm Engine v2 v1.2.0+**, vendored as the `external/storm-engine-v2` submodule (Android needs the engine compiled in, not an installed `.so`)
+- **Storm Engine v2 v1.2.1+**, vendored as the `external/storm-engine-v2` submodule (Android needs the engine compiled in, not an installed `.so`)
 - Java 17, Android cmdline-tools, NDK, and CMake — see the engine's [`examples/android-platformer/README.md`](https://github.com/WillSams/storm-engine-v2/blob/main/examples/android-platformer/README.md) for the exact `sdkmanager` install commands
 - A device with **USB debugging** enabled (or an emulator)
 
@@ -65,7 +65,7 @@ make test       # builds and runs the desktop spec suite
 ## Layout
 
 ```text
-external/storm-engine-v2   Engine submodule (pinned to v1.2.0) with its vendored Android SDL sources
+external/storm-engine-v2   Engine submodule (pinned to v1.2.1) with its vendored Android SDL sources
 include/stormengine2       Symlink to the engine's common/ so <stormengine2/...> includes resolve
 app/                       Gradle module: build.gradle, jni/CMakeLists.txt, ConanActivity, AndroidManifest
 src/                       Game code — states, physics, input (gamepad helper; touch pad comes from the engine)

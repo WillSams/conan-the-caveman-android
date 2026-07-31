@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026-07-31]
+
+### Changed
+
+- **Bumped Storm Engine v2 to v1.2.1** (submodule + installed `libstormenginev2`): picks up the component-flag fixes (animation/render/collision systems now honor the active/visible flags), non-looped animation support (`isLooped`/`lastFrame`/`frameOffset`/`vertical`, defaults preserve old behavior), and the logger/RNG fixes. Engine-side additions (networking layer, netchat/netrepl/checkers examples) are unused by this project.
+
 ## [2026-07-08]
 
 ### Changed
